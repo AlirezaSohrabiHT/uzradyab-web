@@ -123,26 +123,28 @@ const languages = {
   zhTW: { data: zhTW, country: 'TW', name: '中文 (Taiwan)' },
 };
 
-const getDefaultLanguage = () => {
-  const browserLanguages = window.navigator.languages ? window.navigator.languages.slice() : [];
-  const browserLanguage = window.navigator.userLanguage || window.navigator.language;
-  browserLanguages.push(browserLanguage);
-  browserLanguages.push(browserLanguage.substring(0, 2));
+// const getDefaultLanguage = () => {
+//   const browserLanguages = window.navigator.languages ? window.navigator.languages.slice() : [];
+//   const browserLanguage = window.navigator.userLanguage || window.navigator.language;
+//   browserLanguages.push(browserLanguage);
+//   browserLanguages.push(browserLanguage.substring(0, 2));
 
-  for (let i = 0; i < browserLanguages.length; i += 1) {
-    let language = browserLanguages[i].replace('-', '');
-    if (language in languages) {
-      return language;
-    }
-    if (language.length > 2) {
-      language = language.substring(0, 2);
-      if (language in languages) {
-        return language;
-      }
-    }
-  }
-  return 'en';
-};
+//   for (let i = 0; i < browserLanguages.length; i += 1) {
+//     let language = browserLanguages[i].replace('-', '');
+//     if (language in languages) {
+//       return language;
+//     }
+//     if (language.length > 2) {
+//       language = language.substring(0, 2);
+//       if (language in languages) {
+//         return language;
+//       }
+//     }
+//   }
+//   return 'en';
+// };
+
+
 
 const LocalizationContext = createContext({
   languages,
@@ -151,21 +153,15 @@ const LocalizationContext = createContext({
 });
 
 export const LocalizationProvider = ({ children }) => {
-  const [language, setLanguage] = usePersistedState('language', getDefaultLanguage());
-  const direction = /^(ar|he|fa)$/.test(language) ? 'rtl' : 'ltr';
+  const [language, setLanguage] = usePersistedState('language', 'fa'); // اجبار زبان فارسی
+  const direction = 'rtl'; // همیشه راست‌چین
 
   const value = useMemo(() => ({ languages, language, setLanguage, direction }), [languages, language, setLanguage, direction]);
 
   useEffect(() => {
-    let selected;
-    if (language.length > 2) {
-      selected = `${language.slice(0, 2)}-${language.slice(-2).toLowerCase()}`;
-    } else {
-      selected = language;
-    }
-    dayjs.locale(selected);
-    document.dir = direction;
-  }, [language, direction]);
+    dayjs.locale('fa'); // زبان dayjs را به fa تغییر دهید
+    document.dir = direction; // تنظیم جهت متن به RTL
+  }, [direction]);
 
   return (
     <LocalizationContext.Provider value={value}>
@@ -173,6 +169,30 @@ export const LocalizationProvider = ({ children }) => {
     </LocalizationContext.Provider>
   );
 };
+
+// export const LocalizationProvider = ({ children }) => {
+//   const [language, setLanguage] = usePersistedState('language', getDefaultLanguage());
+//   const direction = /^(ar|he|fa)$/.test(language) ? 'rtl' : 'ltr';
+
+//   const value = useMemo(() => ({ languages, language, setLanguage, direction }), [languages, language, setLanguage, direction]);
+
+//   useEffect(() => {
+//     let selected;
+//     if (language.length > 2) {
+//       selected = `${language.slice(0, 2)}-${language.slice(-2).toLowerCase()}`;
+//     } else {
+//       selected = language;
+//     }
+//     dayjs.locale(selected);
+//     document.dir = direction;
+//   }, [language, direction]);
+
+//   return (
+//     <LocalizationContext.Provider value={value}>
+//       {children}
+//     </LocalizationContext.Provider>
+//   );
+// };
 
 export const useLocalization = () => useContext(LocalizationContext);
 
